@@ -1,0 +1,61 @@
+
+ 
+Division (tiene que ir por encima de clientes y campos, 
+es decir tendríamos una locación, que en este caso tiene varias divisiones 
+y dentro de estas divisiones tenemos clientes/campos, 
+tenemos de momento 4: Junin, Ayacucho, Carabobo, Norte).
+(Listo)
+
+ 
+Target resevoir tiene que ir como una entrada de texto manual asociada a cada uno de los pozos.  
+Luifer me da una lista de los mas comunes y hay que permitir crear nuevos. Es tabulable.
+(Listo)
+ 
+
+Total number of Wells in the Macolla (Tiene que ser una entrada manual a nivel de creación de macolla,
+es decir un campo donde el usuario ingrese este numero.) Numero de pozos.
+(En estos momentos no has interfaz paea creacion de Macollas, se hace a nivel de BD).
+ 
+
+Cummulative BRT HRS, es un campo manual a nivel de corrida para la creación de cada corrida 
+el usuario debe especificar este valor y es una entrada manual de números.  
+Duración Total de Corrida (BRT) en horas.
+(Listo)
+
+
+A nivel de seccion:
+Fecha/hora de inicio de bajada del revestidor
+Fecha/hora de finalizacion de bajada del revestidor
+(Listo)
+
+ 
+DDI, eso sale del survey y va para cada corrida,
+Guardar a nivel de Surrey (tabla Survey) lo siguiente: 
+Tort / AHD / DDI / ERD Ratio: (linea 15 del Surrey).
+(Listo)
+
+ 
+# liners run to bottom, esto es un dato de entrada manual y va asociado a cada sección del pozo.
+Numero de corridas para bajar casing/liner (A nivel de seccion).
+(Listo)
+
+ 
+A nivel de pozo  incluir campo texto de lecciones aprendidas.
+(Listo)
+
+ 
+A nivel de corrida  (Hubo una situación de pega? (si/no)
+Si es Si: Pregunta cuantas hubo ¿
+Por cada una especificar TVD (numero con decimales) y también el Mecanismo (desplegable) ya tabulado.
+(Listo)
+
+
+-----------------------------------------------------------------------------------------------------------------------
+
+Mantenimiento de Taladros (No actualiza la empresa responsable). (Listo)
+
+BHA (Estabilizers, distancia toma enteros) (Listo).
+
+Delete en cascada para Pozos, Secciones y Corridas. Revisar.
+
+Chequear para todos los ingresos en comboBox que entren en la BD.
