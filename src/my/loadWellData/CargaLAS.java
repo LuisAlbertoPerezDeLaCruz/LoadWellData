@@ -31,10 +31,12 @@ public class CargaLAS extends CargaArchivoExcel implements miLibreria.GlobalCons
     public Run oRun;
     private java.awt.Frame parent1;
     private int i0=0;
-    private int posDEPT,posGR,posP40H;
-    private int posTVDE, posCRPM, posAZIM_CONT, posINCL_CONT;
-    
-
+    private int posDEPT=-1,posGR=-1,posP40H=-1;
+    private int posTVDE=-1, posCRPM=-1, posAZIM_CONT=-1, posINCL_CONT=-1;
+    private final String PRIMER_TIPO  ="#            DEPT         ROP5         TVDE           GR         P28H         P40H         A28H      TAB_RES    P40H_COND";
+    private final String SEGUNDO_TIPO ="#            DEPT         ROP5         TVDE           GR     P28H_UNC     P40H_UNC      TAB_RES";
+    private final String TERCER_TIPO  ="#    DEPT         ROP        GR_ARC         P28H      P40H_UNC     P40H_COND";
+    private boolean esTercerTipo=false;
     
     public CargaLAS(java.awt.Frame parent, boolean modal) {        
         super(parent, modal);
@@ -163,30 +165,38 @@ public class CargaLAS extends CargaArchivoExcel implements miLibreria.GlobalCons
             br = new BufferedReader(new FileReader(selectedFile));
 
             while ((sCurrentLine = br.readLine()) != null) {
+                sCurrentLine=sCurrentLine.trim();
                 i++;
-                if (i==4) {
-                    if (sCurrentLine.contains("LAS Producer")) {
-                    } else {
-                        br.close();
-                        ok= false;
-                        break;
-                    }                            
+                if (sCurrentLine.contains(PRIMER_TIPO)){
+                    ok=true;
+                    esTercerTipo=false;
+                    i0=i+5;
+                    posDEPT=sCurrentLine.indexOf("DEPT")-11+4;
+                    posGR=sCurrentLine.indexOf("GR")-11+2;
+                    posP40H=sCurrentLine.indexOf("P40H_UNC")-11+8;
+                    posCRPM=sCurrentLine.indexOf("CRPM")-11+4;
+                    posTVDE=sCurrentLine.indexOf("TVDE")-11+4;
+                    posAZIM_CONT=sCurrentLine.indexOf("AZIM_CONT")-11+9;
+                    posINCL_CONT=sCurrentLine.indexOf("INCL_CONT")-11+9;
+                    if (posP40H<=0) posP40H=sCurrentLine.indexOf("P40H")-11+4;                  
                 }
-                if (sCurrentLine.contains("~ASCII")) {
-                    i0=i+1;
-                    br.close();
-                    ok= true;
-                    break;
+                if (sCurrentLine.contains(SEGUNDO_TIPO)){
+                    ok=true;
+                    esTercerTipo=false;
+                    i0=i+5;
+                    posDEPT=sCurrentLine.indexOf("DEPT")-11+4;
+                    posGR=sCurrentLine.indexOf("GR")-11+2;
+                    posP40H=sCurrentLine.indexOf("P40H")-11+8;
+                    posTVDE=sCurrentLine.indexOf("TVDE")-11+4;
+                    if (posP40H<=0) posP40H=sCurrentLine.indexOf("P40H")-11+4;                  
                 }
-                if (sCurrentLine.contains("DEPT") && sCurrentLine.contains("GR") && sCurrentLine.contains("P40H")) {
-                   posDEPT=sCurrentLine.indexOf("DEPT")-11+4;
-                   posGR=sCurrentLine.indexOf("GR")-11+2;
-                   posP40H=sCurrentLine.indexOf("P40H_UNC")-11+8;
-                   posCRPM=sCurrentLine.indexOf("CRPM")-11+4;
-                   posTVDE=sCurrentLine.indexOf("TVDE")-11+4;
-                   posAZIM_CONT=sCurrentLine.indexOf("AZIM_CONT")-11+9;
-                   posINCL_CONT=sCurrentLine.indexOf("INCL_CONT")-11+9;
-                   if (posP40H<=0) posP40H=sCurrentLine.indexOf("P40H")-11+4;
+                if (sCurrentLine.contains(TERCER_TIPO)){
+                    ok=true;
+                    esTercerTipo=true;
+                    i0=i+3;
+                    posDEPT=0;
+                    posGR=26;
+                    posP40H=52;                
                 }
             }
         } catch (IOException e) {
@@ -207,6 +217,9 @@ public class CargaLAS extends CargaArchivoExcel implements miLibreria.GlobalCons
         double tvde=valorNulo,crpm=valorNulo,azimCont=valorNulo,inclCont=valorNulo;
         int i=0,p=0;
         int cantRegistros=0;
+        int l=11;
+        
+        if (esTercerTipo) l=10;
 
         try {
             br = new BufferedReader(new FileReader(selectedFile));
@@ -224,14 +237,14 @@ public class CargaLAS extends CargaArchivoExcel implements miLibreria.GlobalCons
             while ((sCurrentLine = br.readLine()) != null) {
                 i++;
                 if (i>=i0) {
-                   dept=new Double(sCurrentLine.substring(posDEPT, posDEPT+11)) ;
-                   gr=new Double(sCurrentLine.substring(posGR, posGR+11)) ;
-                   p40hunc=new Double(sCurrentLine.substring(posP40H, posP40H+11)) ;
+                   dept=new Double(sCurrentLine.substring(posDEPT, posDEPT+l)) ;
+                   gr=new Double(sCurrentLine.substring(posGR, posGR+l)) ;
+                   p40hunc=new Double(sCurrentLine.substring(posP40H, posP40H+l)) ;
                    tvde=valorNulo;crpm=valorNulo;azimCont=valorNulo;inclCont=valorNulo;
-                   if (posTVDE>=0) tvde=new Double(sCurrentLine.substring(posTVDE, posTVDE+11)) ;
-                   if (posCRPM>=0) crpm=new Double(sCurrentLine.substring(posCRPM, posCRPM+11)) ;
-                   if (posAZIM_CONT>=0) azimCont=new Double(sCurrentLine.substring(posAZIM_CONT, posAZIM_CONT+11)) ;
-                   if (posINCL_CONT>=0) inclCont=new Double(sCurrentLine.substring(posINCL_CONT, posINCL_CONT+11)) ;                   
+                   if (posTVDE>=0) tvde=new Double(sCurrentLine.substring(posTVDE, posTVDE+l)) ;
+                   if (posCRPM>=0) crpm=new Double(sCurrentLine.substring(posCRPM, posCRPM+l)) ;
+                   if (posAZIM_CONT>=0) azimCont=new Double(sCurrentLine.substring(posAZIM_CONT, posAZIM_CONT+l)) ;
+                   if (posINCL_CONT>=0) inclCont=new Double(sCurrentLine.substring(posINCL_CONT, posINCL_CONT+l)) ;                   
                    if (dept>=valorDesde && dept<=valorHasta) {
                        sBulk+="select " +lasId+" as lasId,";
                        sBulk+=dept+" as dept,";
