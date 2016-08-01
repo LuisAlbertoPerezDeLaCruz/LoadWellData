@@ -659,7 +659,7 @@ public class MantBHA extends MantPpal {
                             oBHAPipe.setSecuencia(new Long(o.toString()));
                         }
                         if (j==2) {
-                            oBHAPipe.setLongitud(new Long(o.toString()));
+                            oBHAPipe.setLongitud(new Double(o.toString()));
                         }
                         if (j==3) {
                             oBHAPipe.setOd(new Double(o.toString()));
@@ -933,7 +933,7 @@ public class MantBHA extends MantPpal {
                            if ("m".equals(uom)) {
                               dblLen*=3.281; 
                            }
-                           len=df.format(round(dblLen,3));
+                           len=df.format(round(dblLen,3)).replace(',', '.');
                            dblLen=Double.parseDouble(len);
                        }
                        if ("od".equals(tubularComponentRow.getName())) {
@@ -943,7 +943,7 @@ public class MantBHA extends MantPpal {
                            if ("m".equals(uom)) {
                               dblOd*=3.281; 
                            }
-                           od=df.format(round(dblOd,3));
+                           od=df.format(round(dblOd,3)).replace(',', '.');
                            dblOd=Double.parseDouble(od);
                        }
                        if ("customData".equals(tubularComponentRow.getName())) {
@@ -971,7 +971,7 @@ public class MantBHA extends MantPpal {
                                   dblDistBladeBot=new Double(distBladeBot);
                                   if ("m".equals(uom))
                                     dblDistBladeBot*=3.281;
-                                  distBladeBot=df.format(round(dblDistBladeBot,3));
+                                  distBladeBot=df.format(round(dblDistBladeBot,3)).replace(',', '.');
                                   dblDistBladeBot=new Double(distBladeBot);
                               }
                               if ("odBladeMx".equals(e.getName())) {
@@ -980,7 +980,7 @@ public class MantBHA extends MantPpal {
                                   dblOdBladeMx=new Double(odBladeMx);
                                   if ("m".equals(uom))
                                     dblOdBladeMx*=3.281;    
-                                  odBladeMx=df.format(round(dblOdBladeMx,3));
+                                  odBladeMx=df.format(round(dblOdBladeMx,3)).replace(',', '.');
                                   dblOdBladeMx=new Double(odBladeMx);
                               }
                               if ("shapeBlade".equals(e.getName())) {
