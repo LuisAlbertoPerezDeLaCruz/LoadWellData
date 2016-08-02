@@ -18,6 +18,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import miLibreria.bd.*;
 import static my.loadWellData.CargaArchivoExcel.SELECCION_INVALIDA;
 import static my.loadWellData.CargaArchivoExcel.SELECCION_VALIDA;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -33,10 +34,7 @@ public class CargaLAS extends CargaArchivoExcel implements miLibreria.GlobalCons
     private int i0=0;
     private int posDEPT=-1,posGR=-1,posP40H=-1;
     private int posTVDE=-1, posCRPM=-1, posAZIM_CONT=-1, posINCL_CONT=-1;
-    private final String PRIMER_TIPO  ="#            DEPT         ROP5         TVDE           GR         P28H         P40H         A28H      TAB_RES    P40H_COND";
-    private final String SEGUNDO_TIPO ="#            DEPT         ROP5         TVDE           GR     P28H_UNC     P40H_UNC      TAB_RES";
-    private final String TERCER_TIPO  ="#    DEPT         ROP        GR_ARC         P28H      P40H_UNC     P40H_COND";
-    private boolean esTercerTipo=false;
+    public  String[] campos;
     
     public CargaLAS(java.awt.Frame parent, boolean modal) {        
         super(parent, modal);
@@ -158,7 +156,15 @@ public class CargaLAS extends CargaArchivoExcel implements miLibreria.GlobalCons
         boolean ok=false;
         String valor;
         BufferedReader br = null;
+        String camposWork="";
         int i=0;
+        posDEPT=-1;
+        posGR=-1;
+        posP40H=-1;
+        posTVDE=-1;
+        posCRPM=-1;
+        posAZIM_CONT=-1;
+        posINCL_CONT=-1;       
         try {
             String sCurrentLine;
 
@@ -167,42 +173,91 @@ public class CargaLAS extends CargaArchivoExcel implements miLibreria.GlobalCons
             while ((sCurrentLine = br.readLine()) != null) {
                 sCurrentLine=sCurrentLine.trim();
                 i++;
-                if (sCurrentLine.contains(PRIMER_TIPO)){
+                if (sCurrentLine.equals("~CURVE INFORMATION")){
+                    sCurrentLine = br.readLine();
+                    sCurrentLine = br.readLine();
+                    i+=2;
+                    while ((sCurrentLine = br.readLine()) != null) {
+                        sCurrentLine=sCurrentLine.trim();
+                        i++; 
+                        if (sCurrentLine.indexOf("#---")>=0){
+                            break;
+                        }
+                        if (camposWork.length()>0) camposWork+=",";
+                        int l=sCurrentLine.indexOf(".");
+                        if (l<0) l=13;
+                        camposWork+=sCurrentLine.substring(0, l).trim();
+                    }
+                    campos=camposWork.split(",");
+                    for (int idx=0;idx<=campos.length-1;idx++){
+                        valor=campos[idx];
+                        switch (valor) {
+                            case "DEPT":
+                                posDEPT=idx;
+                                break;
+                            case "GR":
+                                posGR=idx;
+                            case "GR_ARC":
+                                posGR=idx;
+                                break;
+                            case "P40H":
+                                posP40H=idx;
+                                break;
+                            case "P40H_UNC":
+                                posP40H=idx;
+                                break;
+                            case "CRPM":
+                                posCRPM=idx;
+                                break;
+                            case "TVDE":
+                                posTVDE=idx;
+                                break;
+                            case "AZIM_CONT":
+                                posAZIM_CONT=idx;
+                                break;
+                            case "INCL_CONT":
+                                posINCL_CONT=idx;
+                                break;
+                        }
+                    }
                     ok=true;
-                    esTercerTipo=false;
-                    i0=i+5;
-                    posDEPT=sCurrentLine.indexOf("DEPT")-11+4;
-                    posGR=sCurrentLine.indexOf("GR")-11+2;
-                    posP40H=sCurrentLine.indexOf("P40H_UNC")-11+8;
-                    posCRPM=sCurrentLine.indexOf("CRPM")-11+4;
-                    posTVDE=sCurrentLine.indexOf("TVDE")-11+4;
-                    posAZIM_CONT=sCurrentLine.indexOf("AZIM_CONT")-11+9;
-                    posINCL_CONT=sCurrentLine.indexOf("INCL_CONT")-11+9;
-                    if (posP40H<=0) posP40H=sCurrentLine.indexOf("P40H")-11+4;                  
                 }
-                if (sCurrentLine.contains(SEGUNDO_TIPO)){
-                    ok=true;
-                    esTercerTipo=false;
-                    i0=i+5;
-                    posDEPT=sCurrentLine.indexOf("DEPT")-11+4;
-                    posGR=sCurrentLine.indexOf("GR")-11+2;
-                    posP40H=sCurrentLine.indexOf("P40H")-11+8;
-                    posTVDE=sCurrentLine.indexOf("TVDE")-11+4;
-                    if (posP40H<=0) posP40H=sCurrentLine.indexOf("P40H")-11+4;                  
-                }
-                if (sCurrentLine.contains(TERCER_TIPO)){
-                    ok=true;
-                    esTercerTipo=true;
-                    i0=i+3;
-                    posDEPT=0;
-                    posGR=26;
-                    posP40H=52;                
+                if (soloNumeros(sCurrentLine)) {
+                    i0=i;
+                    break;
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
         return ok;
+    }
+    
+    public boolean soloNumeros(String s) {
+        boolean ok=true;
+        final String numerosCadena="0123456789.- ";
+        for (int i=0;i<=s.length()-1;i++) {
+            if (numerosCadena.indexOf(s.substring(i, i+1))==-1) {
+                ok=false;
+                break;
+            }
+        }
+        return ok;
+    }
+    
+    public Double[] dameValores(String s){
+        String sWork=s;
+        String spaces="";
+        for (int i=10;i>=1;i--){
+            spaces=StringUtils.repeat(" ", i);
+            sWork=sWork.replace(spaces, ",");          
+        }
+        String[] sArray = sWork.split(",");
+        Double[] dArray = new Double[sArray.length];
+        for (int i=0;i<=sArray.length-1;i++){
+            dArray[i]=Double.parseDouble(sArray[i]);
+        }
+        return dArray;
     }
     
     public void msgbox(String s){
@@ -218,9 +273,8 @@ public class CargaLAS extends CargaArchivoExcel implements miLibreria.GlobalCons
         int i=0,p=0;
         int cantRegistros=0;
         int l=11;
+        Double[] valores;
         
-        if (esTercerTipo) l=10;
-
         try {
             br = new BufferedReader(new FileReader(selectedFile));
             while ((br.readLine()) != null) {
@@ -235,16 +289,17 @@ public class CargaLAS extends CargaArchivoExcel implements miLibreria.GlobalCons
             String sBulk=" select * from ( ";
             br = new BufferedReader(new FileReader(selectedFile));
             while ((sCurrentLine = br.readLine()) != null) {
+                sCurrentLine=sCurrentLine.trim();
                 i++;
                 if (i>=i0) {
-                   dept=new Double(sCurrentLine.substring(posDEPT, posDEPT+l)) ;
-                   gr=new Double(sCurrentLine.substring(posGR, posGR+l)) ;
-                   p40hunc=new Double(sCurrentLine.substring(posP40H, posP40H+l)) ;
-                   tvde=valorNulo;crpm=valorNulo;azimCont=valorNulo;inclCont=valorNulo;
-                   if (posTVDE>=0) tvde=new Double(sCurrentLine.substring(posTVDE, posTVDE+l)) ;
-                   if (posCRPM>=0) crpm=new Double(sCurrentLine.substring(posCRPM, posCRPM+l)) ;
-                   if (posAZIM_CONT>=0) azimCont=new Double(sCurrentLine.substring(posAZIM_CONT, posAZIM_CONT+l)) ;
-                   if (posINCL_CONT>=0) inclCont=new Double(sCurrentLine.substring(posINCL_CONT, posINCL_CONT+l)) ;                   
+                   valores=dameValores(sCurrentLine);
+                   if (posDEPT>=0) dept=valores[posDEPT]; else dept=valorNulo;
+                   if (posGR>=0) gr=valores[posGR]; else gr=valorNulo;                   
+                   if (posP40H>=0) p40hunc=valores[posP40H]; else p40hunc=valorNulo;                   
+                   if (posTVDE>=0) tvde=valores[posTVDE]; else tvde=valorNulo; 
+                   if (posCRPM>=0) crpm=valores[posCRPM]; else crpm=valorNulo;
+                   if (posAZIM_CONT>=0) azimCont=valores[posAZIM_CONT]; else azimCont=valorNulo;
+                   if (posINCL_CONT>=0) inclCont=valores[posINCL_CONT]; else inclCont=valorNulo;                  
                    if (dept>=valorDesde && dept<=valorHasta) {
                        sBulk+="select " +lasId+" as lasId,";
                        sBulk+=dept+" as dept,";
