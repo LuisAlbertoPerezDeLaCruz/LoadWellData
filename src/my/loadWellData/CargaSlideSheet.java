@@ -340,10 +340,12 @@ public class CargaSlideSheet extends CargaArchivoExcel implements miLibreria.Glo
         String valor;
         SimpleDateFormat f = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
         cursorEspera();
+        boolean grabar=true;
         for (int i=i0;i<i1;i++) {
             oSlideSheetPerMD=new SlideSheetPerMD();
             oSlideSheetPerMD.setDrillingMode("");
             oSlideSheetPerMD.setOperationMode("");
+            grabar=true;
             for (int j=0;j<=(tipoDT==MOTOR?25:26);j++) {
                 valor=oXL.valorCelda(i,j);
                 if ("N/A".equals(valor)) valor="0";
@@ -392,6 +394,10 @@ public class CargaSlideSheet extends CargaArchivoExcel implements miLibreria.Glo
                         oSlideSheetPerMD.setOffBotTorque(new Double(valor)); 
                     } 
                     if ((int) campos[cp.OperationMode][1]==j) {
+                        if ("Reaming,Circulating".indexOf(valor)>=0) {
+                            grabar=false;
+                            break;
+                        }
                         oSlideSheetPerMD.setOperationMode(valor); 
                     }
                     if ((int) campos[cp.PowerSetting][1]==j) {
@@ -413,7 +419,7 @@ public class CargaSlideSheet extends CargaArchivoExcel implements miLibreria.Glo
                 oSlideSheetPerMD.setSlideSheetId(slideSheetId);
             }
             if (oSlideSheetPerMD.getMdFrom()>=valorDesde && oSlideSheetPerMD.getMdTo()<valorHasta) {
-                oBD.insert(oSlideSheetPerMD);
+                if (grabar) oBD.insert(oSlideSheetPerMD);
             }
         }
         procesarDiretionalDrillingSumary(i0,i1);
@@ -645,8 +651,10 @@ private int indexOfList(List list,String nombre) {
             
             String tipoMedida="";
             Double factor=1.0;
+            boolean grabar=true;
             
             for ( int i=0; i<=listSteeringSheetRows.size()-1; i++ ) {
+                grabar=true;
                 Element rowNode = (Element) listSteeringSheetRows.get(i);                
                 List listRowAttributes=rowNode.getChildren();                
                 oSlideSheetPerMD=new SlideSheetPerMD();
@@ -709,6 +717,10 @@ private int indexOfList(List list,String nombre) {
                                 oSlideSheetPerMD.setDrillingMode(contenidoAtributo);
                             } else
                                 oSlideSheetPerMD.setOperationMode(contenidoAtributo);
+                            if ("Reaming,Circulating".indexOf(contenidoAtributo)>=0) {
+                                grabar=false;
+                                break;
+                            }
                         break;
                         case "Toolface" :
                             oSlideSheetPerMD.setTfAngle(Math.round(new Double(contenidoAtributo)));
@@ -741,8 +753,7 @@ private int indexOfList(List list,String nombre) {
                             oSlideSheetPerMD.setSrpm(Math.round(new Double(contenidoAtributo)));
                     }
                 }
-                aSlideSheetPerMD[contador++]=oSlideSheetPerMD;
-
+                if (grabar) aSlideSheetPerMD[contador++]=oSlideSheetPerMD;
             }
                       
         } catch ( IOException io ) {

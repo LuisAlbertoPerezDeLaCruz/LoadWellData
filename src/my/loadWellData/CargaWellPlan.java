@@ -200,7 +200,7 @@ public class CargaWellPlan extends CargaArchivoExcel  implements miLibreria.Glob
                 valor=oXL.valorCelda(i,0);
                 if ("Survey Type:".equals(valor.trim())) {
                     valor=oXL.valorCelda(i,2);
-                    if ("Def Plan".equals(valor.trim())) {
+                    if ("Def Plan".equals(valor.trim()) || "Non-Def Plan".equals(valor.trim()) ) {
                         i1=i-4;
                         cursorNormal();
                         return true;
